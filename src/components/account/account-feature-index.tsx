@@ -1,12 +1,12 @@
 import { ReactNode } from 'react'
-import { useWalletUi } from '@wallet-ui/react'
+import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletButton } from '@/components/solana/solana-provider'
 
 export default function AccountFeatureIndex({ redirect }: { redirect: (path: string) => ReactNode }) {
-  const { account } = useWalletUi()
+  const wallet = useWallet()
 
-  if (account) {
-    return redirect(`/account/${account.address.toString()}`)
+  if (wallet.publicKey) {
+    return redirect(`/account/${wallet.publicKey.toString()}`)
   }
 
   return (

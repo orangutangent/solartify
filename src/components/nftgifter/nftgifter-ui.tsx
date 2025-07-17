@@ -1,155 +1,69 @@
-import { ellipsify } from '@wallet-ui/react'
-import {
-  useNftgifterAccountsQuery,
-  useNftgifterCloseMutation,
-  useNftgifterDecrementMutation,
-  useNftgifterIncrementMutation,
-  useNftgifterInitializeMutation,
-  useNftgifterProgram,
-  useNftgifterProgramId,
-  useNftgifterSetMutation,
-} from './nftgifter-data-access'
+import { useNftGifterProgram } from './nftgifter-data-access'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ExplorerLink } from '../cluster/cluster-ui'
-import { NftgifterAccount } from '@project/anchor'
-import { ReactNode } from 'react'
+import { Spinner } from '@/components/ui/spinner'
+import { useWallet } from '@solana/wallet-adapter-react'
 
-export function NftgifterProgramExplorerLink() {
-  const programId = useNftgifterProgramId()
+export function NftgifterUI() {
+  const { configQuery, claimTokens } = useNftGifterProgram() ?? {}
+  const wallet = useWallet()
 
-  return <ExplorerLink address={programId.toString()} label={ellipsify(programId.toString())} />
-}
-
-export function NftgifterList() {
-  const nftgifterAccountsQuery = useNftgifterAccountsQuery()
-
-  if (nftgifterAccountsQuery.isLoading) {
-    return <span className="loading loading-spinner loading-lg"></span>
+  if (!wallet.publicKey) {
+    return <div className="text-center text-zinc-400">Connect your wallet to use NFT Gifter</div>
   }
 
-  if (!nftgifterAccountsQuery.data?.length) {
+  if (configQuery?.isLoading) {
     return (
-      <div className="text-center">
-        <h2 className={'text-2xl'}>No accounts</h2>
-        No accounts found. Initialize one to get started.
+      <div className="flex justify-center py-8">
+        <Spinner className="w-8 h-8 text-primary animate-spin" />
       </div>
     )
   }
 
-  return (
-    <div className="grid lg:grid-cols-2 gap-4">
-      {nftgifterAccountsQuery.data?.map((nftgifter) => (
-        <NftgifterCard key={nftgifter.address} nftgifter={nftgifter} />
-      ))}
-    </div>
-  )
-}
-
-export function NftgifterProgramGuard({ children }: { children: ReactNode }) {
-  const programAccountQuery = useNftgifterProgram()
-
-  if (programAccountQuery.isLoading) {
-    return <span className="loading loading-spinner loading-lg"></span>
+  if (configQuery?.isError) {
+    return <div className="text-center text-red-400">Config not initialized. Ask admin to initialize config.</div>
   }
 
-  if (!programAccountQuery.data?.value) {
-    return (
-      <div className="alert alert-info flex justify-center">
-        <span>Program account not found. Make sure you have deployed the program and are on the correct cluster.</span>
-      </div>
-    )
-  }
+  const config = configQuery?.data
 
-  return children
-}
-
-function NftgifterCard({ nftgifter }: { nftgifter: NftgifterAccount }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Nftgifter: {nftgifter.data.count}</CardTitle>
-        <CardDescription>
-          Account: <ExplorerLink address={nftgifter.address} label={ellipsify(nftgifter.address)} />
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex gap-4 justify-evenly">
-          <NftgifterButtonIncrement nftgifter={nftgifter} />
-          <NftgifterButtonSet nftgifter={nftgifter} />
-          <NftgifterButtonDecrement nftgifter={nftgifter} />
-          <NftgifterButtonClose nftgifter={nftgifter} />
+    <div className="max-w-md mx-auto flex flex-col gap-6 p-6 bg-gradient-to-br from-zinc-900 to-zinc-800 rounded-2xl shadow-xl border border-zinc-700 mt-8">
+      <div className="flex flex-col gap-2">
+        <div className="text-xl font-bold text-white mb-2">NFT Gifter</div>
+        <div className="text-sm text-zinc-400">
+          <div>
+            Admin: <span className="font-mono text-zinc-200">{config?.owner.toString() ?? '—'}</span>
+          </div>
+          <div>
+            Purchase price:{' '}
+            <span className="font-mono text-zinc-200">{config?.purchasePriceLamports?.toString() ?? '—'}</span> lamports
+          </div>
+          <div>
+            Claim price:{' '}
+            <span className="font-mono text-zinc-200">{config?.claimPriceLamports?.toString() ?? '—'}</span> lamports
+          </div>
+          <div>
+            Tokens per claim:{' '}
+            <span className="font-mono text-zinc-200">{config?.tokensPerClaim?.toString() ?? '—'}</span>
+          </div>
         </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-export function NftgifterButtonInitialize() {
-  const mutationInitialize = useNftgifterInitializeMutation()
-
-  return (
-    <Button onClick={() => mutationInitialize.mutateAsync()} disabled={mutationInitialize.isPending}>
-      Initialize Nftgifter {mutationInitialize.isPending && '...'}
-    </Button>
-  )
-}
-
-export function NftgifterButtonIncrement({ nftgifter }: { nftgifter: NftgifterAccount }) {
-  const incrementMutation = useNftgifterIncrementMutation({ nftgifter })
-
-  return (
-    <Button variant="outline" onClick={() => incrementMutation.mutateAsync()} disabled={incrementMutation.isPending}>
-      Increment
-    </Button>
-  )
-}
-
-export function NftgifterButtonSet({ nftgifter }: { nftgifter: NftgifterAccount }) {
-  const setMutation = useNftgifterSetMutation({ nftgifter })
-
-  return (
-    <Button
-      variant="outline"
-      onClick={() => {
-        const value = window.prompt('Set value to:', nftgifter.data.count.toString() ?? '0')
-        if (!value || parseInt(value) === nftgifter.data.count || isNaN(parseInt(value))) {
-          return
-        }
-        return setMutation.mutateAsync(parseInt(value))
-      }}
-      disabled={setMutation.isPending}
-    >
-      Set
-    </Button>
-  )
-}
-
-export function NftgifterButtonDecrement({ nftgifter }: { nftgifter: NftgifterAccount }) {
-  const decrementMutation = useNftgifterDecrementMutation({ nftgifter })
-
-  return (
-    <Button variant="outline" onClick={() => decrementMutation.mutateAsync()} disabled={decrementMutation.isPending}>
-      Decrement
-    </Button>
-  )
-}
-
-export function NftgifterButtonClose({ nftgifter }: { nftgifter: NftgifterAccount }) {
-  const closeMutation = useNftgifterCloseMutation({ nftgifter })
-
-  return (
-    <Button
-      variant="destructive"
-      onClick={() => {
-        if (!window.confirm('Are you sure you want to close this account?')) {
-          return
-        }
-        return closeMutation.mutateAsync()
-      }}
-      disabled={closeMutation.isPending}
-    >
-      Close
-    </Button>
+      </div>
+      <Button
+        onClick={() => claimTokens?.mutateAsync()}
+        disabled={claimTokens?.isPending || !config}
+        className="transition-all duration-200 bg-gradient-to-r from-indigo-500 to-fuchsia-500 hover:from-fuchsia-500 hover:to-indigo-500 text-white font-semibold py-2 px-4 rounded-xl shadow-lg hover:scale-105 active:scale-95"
+      >
+        {claimTokens?.isPending ? (
+          <span className="flex items-center gap-2">
+            <Spinner className="w-4 h-4" /> Claiming...
+          </span>
+        ) : (
+          <span>Claim Tokens</span>
+        )}
+      </Button>
+      {claimTokens?.isError && <div className="text-xs text-red-400 mt-2">Claim failed. Try again later.</div>}
+      {claimTokens?.isSuccess && (
+        <div className="text-xs text-green-400 mt-2">Claim successful! Tx: {claimTokens.data}</div>
+      )}
+    </div>
   )
 }

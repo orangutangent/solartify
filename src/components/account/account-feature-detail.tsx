@@ -1,42 +1,46 @@
-import { assertIsAddress } from 'gill'
 import { useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { ExplorerLink } from '@/components/cluster/cluster-ui'
 import { AppHero } from '@/components/app-hero'
 import { ellipsify } from '@/lib/utils'
-
 import { AccountBalance, AccountButtons, AccountTokens, AccountTransactions } from './account-ui'
+import { PublicKey } from '@solana/web3.js'
+import { address as toAddress } from 'gill'
 
 export default function AccountFeatureDetail() {
   const params = useParams()
   const address = useMemo(() => {
     if (!params.address || typeof params.address !== 'string') {
-      return
+      return undefined
     }
-    assertIsAddress(params.address)
-    return params.address
+    try {
+      return new PublicKey(params.address)
+    } catch {
+      return undefined
+    }
   }, [params])
   if (!address) {
     return <div>Error loading account</div>
   }
+  const addr = toAddress(address.toString())
 
   return (
     <div>
       <AppHero
-        title={<AccountBalance address={address} />}
+        title={<AccountBalance address={addr} />}
         subtitle={
           <div className="my-4">
-            <ExplorerLink address={address.toString()} label={ellipsify(address.toString())} />
+            <ExplorerLink path={address.toString()} label={ellipsify(address.toString())} />
           </div>
         }
       >
         <div className="my-4">
-          <AccountButtons address={address} />
+          <AccountButtons address={addr} />
         </div>
       </AppHero>
       <div className="space-y-8">
-        <AccountTokens address={address} />
-        <AccountTransactions address={address} />
+        <AccountTokens address={addr} />
+        <AccountTransactions address={addr} />
       </div>
     </div>
   )

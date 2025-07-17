@@ -13,7 +13,7 @@ use instructions::{
     mint::*
 };
 
-declare_id!("JAVuBXeBZqXNtS73azhBDAoYaaAFfo4gWXoZe2e7Jf8H");
+declare_id!("5gm1Nn7N3BDn2og4Umw5JePUhLUF2azKqwJduQx3tApg");
 
 #[program]
 pub mod nft_gifter {
