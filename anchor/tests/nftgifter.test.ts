@@ -14,7 +14,7 @@ describe('nftgifter - claim_tokens', () => {
 
   const purchasePrice = 1_000_000 // 0.001 SOL
   const claimPrice = 100_000 // 0.0001 SOL
-  const tokensPerClaim = 5
+  const tokensPerClaim = 5_000_000_000 // 5 tokens
 
   async function setupTestEnv() {
     const user = anchor.web3.Keypair.generate()
@@ -41,7 +41,7 @@ describe('nftgifter - claim_tokens', () => {
       admin,
       configPda,
       null,
-      0,
+      9,
       undefined,
       undefined,
       TOKEN_PROGRAM_ID,
@@ -153,7 +153,7 @@ describe('nftgifter - claim_tokens', () => {
     console.log('Config balance before purchase:', balanceBefore)
 
     const purchaseTx = await program.methods
-      .purchaseTokens()
+      .purchaseTokens(new BN(5))
       .accounts({
         user: user.publicKey,
         config: configPda,
@@ -179,7 +179,7 @@ describe('nftgifter - claim_tokens', () => {
 
     const balanceAfter = await provider.connection.getBalance(configPda, 'confirmed')
     console.log('Config balance after purchase:', balanceAfter)
-    assert.equal(balanceAfter - balanceBefore, purchasePrice, 'Config PDA should have received purchase SOL')
+    assert.equal(balanceAfter - balanceBefore, purchasePrice * 5, 'Config PDA should have received purchase SOL')
   })
 
   it('Admin can withdraw SOL from config PDA', async () => {
@@ -345,6 +345,6 @@ describe('nftgifter - claim_tokens', () => {
     console.log('User NFT balance after mint:', Number(nftAccInfo.amount))
 
     assert.equal(Number(nftAccInfo.amount), 1, 'User should have received NFT')
-    assert.equal(Number(userTokenBalanceAfter), 0, 'User tokens should be burned')
+    assert.equal(Number(userTokenBalanceAfter), 4_000_000_000, 'User tokens should be burned')
   })
 })

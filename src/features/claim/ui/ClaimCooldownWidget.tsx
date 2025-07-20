@@ -16,7 +16,7 @@ function formatTimeLeft(seconds: number) {
 
 export function ClaimCooldownWidget() {
   const wallet = useWallet()
-  const { program } = useNftGifterProgram()
+  const { program, claimTokens } = useNftGifterProgram()
   const [cooldown, setCooldown] = useState<number>(0)
   const [lastClaim, setLastClaim] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
@@ -28,10 +28,11 @@ export function ClaimCooldownWidget() {
       setLoading(true)
       try {
         const programId = PROGRAM_ID_PK
+        console.log('programId', programId.toBase58())
         const [userClaimPda] = findUserClaimPda(wallet.publicKey, programId)
-        // Получаем данные через Anchor
         const userClaim = await program.account.userClaimData.fetch(userClaimPda)
         const lastClaimTs = Number(userClaim.lastClaimTs)
+        console.log('lastClaimTs', lastClaimTs)
         setLastClaim(lastClaimTs)
         const now = Math.floor(Date.now() / 1000)
         const left = 86400 - (now - lastClaimTs)
@@ -53,6 +54,26 @@ export function ClaimCooldownWidget() {
       if (timer) clearInterval(timer)
     }
   }, [wallet.publicKey, program])
+
+  // Обновляем таймер после успешного claim
+  useEffect(() => {
+    if (claimTokens?.isSuccess) {
+      // Повторно получаем lastClaimTs
+      ;(async () => {
+        if (!wallet.publicKey || !program) return
+        const programId = PROGRAM_ID_PK
+        const [userClaimPda] = findUserClaimPda(wallet.publicKey, programId)
+        try {
+          const userClaim = await program.account.userClaimData.fetch(userClaimPda)
+          const lastClaimTs = Number(userClaim.lastClaimTs)
+          setLastClaim(lastClaimTs)
+          const now = Math.floor(Date.now() / 1000)
+          const left = 86400 - (now - lastClaimTs)
+          setCooldown(left > 0 ? left : 0)
+        } catch {}
+      })()
+    }
+  }, [claimTokens?.isSuccess, wallet.publicKey, program])
 
   return (
     <div className="flex flex-col items-center justify-center p-4 rounded-xl bg-gradient-to-br from-fuchsia-900/60 to-indigo-900/40 border border-zinc-700 shadow-lg mb-4">

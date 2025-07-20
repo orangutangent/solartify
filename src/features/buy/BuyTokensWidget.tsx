@@ -1,20 +1,22 @@
 'use client'
 import { useState } from 'react'
 import { Spinner } from '@/components/ui/spinner'
+import { useNftGifterProgram } from '@/components/nftgifter/nftgifter-data-access'
+import { useWallet } from '@solana/wallet-adapter-react'
 
 export function BuyTokensWidget() {
   const [amount, setAmount] = useState('1')
-  const [status, setStatus] = useState<'idle' | 'pending' | 'success' | 'error'>('idle')
+  const [txid, setTxid] = useState<string | null>(null)
+  const { purchaseTokens } = useNftGifterProgram()
+  const wallet = useWallet()
 
   const handleBuy = async () => {
-    setStatus('pending')
+    setTxid(null)
+    if (!wallet.publicKey || !amount || isNaN(Number(amount)) || Number(amount) <= 0) return
     try {
-      // TODO: Реализовать покупку токенов через Anchor-программу
-      await new Promise((r) => setTimeout(r, 1500))
-      setStatus('success')
-    } catch {
-      setStatus('error')
-    }
+      const tx = await purchaseTokens.mutateAsync(Number(amount))
+      setTxid(tx)
+    } catch {}
   }
 
   return (
@@ -22,23 +24,23 @@ export function BuyTokensWidget() {
       <div className="mb-2 text-lg font-semibold text-white">Buy Tokens</div>
       <input
         type="number"
-        min={0.01}
-        step={0.01}
+        min={1}
+        step={1}
         value={amount}
-        onChange={(e) => setAmount(e.target.value)}
+        onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ''))}
         className="w-full mb-3 px-3 py-2 rounded bg-zinc-800 text-white border border-zinc-700 focus:outline-none"
-        placeholder="Amount in SOL"
-        disabled={status === 'pending'}
+        placeholder="Amount of tokens"
+        disabled={purchaseTokens.isPending}
       />
       <button
         className="w-full py-3 rounded-xl bg-gradient-to-r from-fuchsia-500 to-indigo-500 text-white text-lg font-bold shadow-lg hover:scale-105 active:scale-95 transition-all duration-200"
         onClick={handleBuy}
-        disabled={status === 'pending' || !amount || Number(amount) <= 0}
+        disabled={purchaseTokens.isPending || !amount || Number(amount) <= 0}
       >
-        {status === 'pending' ? <Spinner className="w-5 h-5" /> : 'Купить'}
+        {purchaseTokens.isPending ? <Spinner className="w-5 h-5" /> : 'Buy Tokens'}
       </button>
-      {status === 'success' && <div className="text-green-400 mt-2">Success!</div>}
-      {status === 'error' && <div className="text-red-400 mt-2">Error. Try again.</div>}
+      {txid && <div className="text-green-400 mt-2 break-all">Success! Tx: {txid}</div>}
+      {purchaseTokens.isError && <div className="text-red-400 mt-2">Error. Try again.</div>}
     </div>
   )
 }

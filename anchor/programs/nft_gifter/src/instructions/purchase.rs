@@ -25,17 +25,18 @@ pub struct PurchaseTokens<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn _purchase_tokens(ctx: Context<PurchaseTokens>) -> Result<()> {
+pub fn _purchase_tokens(ctx: Context<PurchaseTokens>, amount: u64) -> Result<()> {
     let config = &ctx.accounts.config;
-    let price = config.purchase_price_lamports;
-    let amount = config.tokens_per_claim;
-    require!(ctx.accounts.user.lamports() >= price, NftGifterError::InsufficientFunds);
+    let price_per_token = config.purchase_price_lamports;
+    let decimals = ctx.accounts.token_mint.decimals;
+    let amount_on_chain = amount.checked_mul(10u64.pow(decimals as u32)).ok_or(NftGifterError::MathOverflow)?;
+    let total_price = price_per_token.checked_mul(amount).ok_or(NftGifterError::MathOverflow)?;
+    require!(ctx.accounts.user.lamports() >= total_price, NftGifterError::InsufficientFunds);
 
-    // Перевод SOL на config PDA
     let ix = anchor_lang::solana_program::system_instruction::transfer(
         &ctx.accounts.user.key(),
         &ctx.accounts.config.key(),
-        price,
+        total_price,
     );
     anchor_lang::solana_program::program::invoke(
         &ix,
@@ -58,6 +59,6 @@ pub fn _purchase_tokens(ctx: Context<PurchaseTokens>) -> Result<()> {
         cpi_accounts,
         signer,
     );
-    token_interface::mint_to(cpi_ctx, amount)?;
+    token_interface::mint_to(cpi_ctx, amount_on_chain)?;
     Ok(())
 } 

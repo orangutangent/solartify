@@ -13,6 +13,8 @@ import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_I
 
 import { ADMIN_PUBKEY_PK } from '@/lib/constants'
 import { NftGifter } from '@/types/nft_gifter'
+import BN from 'bn.js'
+// import * as anchor from '@coral-xyz/anchor'
 
 export function useNftGifterProgram() {
   const { connection } = useConnection()
@@ -76,7 +78,6 @@ export function useNftGifterProgram() {
       const [configPda] = findConfigPda(ADMIN_PUBKEY_PK, programId)
       const mintPubkey = new PublicKey(process.env.NEXT_PUBLIC_MINT_PUBKEY!)
       const userTokenAccount = await getAssociatedTokenAddress(mintPubkey, wallet.publicKey)
-      // Для NFT создаём новый mint
       const nftMint = Keypair.generate()
       const userNftAccount = await getAssociatedTokenAddress(nftMint.publicKey, wallet.publicKey)
       const tx = await program.methods
@@ -103,15 +104,16 @@ export function useNftGifterProgram() {
   // Покупка токенов
   const purchaseTokens = useMutation({
     mutationKey: ['nftgifter-purchase', { programId }],
-    mutationFn: async (amountSol: number) => {
+    mutationFn: async (amount: number) => {
       if (!program || !wallet || !wallet.publicKey) throw new Error('No wallet/program')
+      if (!amount || amount <= 0) throw new Error('Amount must be positive')
       const [configPda] = findConfigPda(ADMIN_PUBKEY_PK, programId)
       const mintPubkey = new PublicKey(process.env.NEXT_PUBLIC_MINT_PUBKEY!)
       const userTokenAccount = await getAssociatedTokenAddress(mintPubkey, wallet.publicKey)
-      // amountSol — сколько SOL пользователь хочет потратить
-      // В контракте цена берётся из конфига, amount не передаётся, но можно сделать несколько покупок подряд если нужно больше токенов
+
+      const amountOnChain = new BN(amount)
       const tx = await program.methods
-        .purchaseTokens()
+        .purchaseTokens(amountOnChain)
         .accountsStrict({
           user: wallet.publicKey,
           config: configPda,

@@ -1,5 +1,5 @@
 {
-  "address": "5gm1Nn7N3BDn2og4Umw5JePUhLUF2azKqwJduQx3tApg",
+  "address": "5PvnABfeQoqHGGGQ87BmjPCJ41wBuiSu3L3h4RbH4Zj1",
   "metadata": {
     "name": "nft_gifter",
     "version": "0.1.0",
@@ -391,7 +391,12 @@
           "address": "11111111111111111111111111111111"
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
     },
     {
       "name": "update_config",
@@ -568,9 +573,6 @@
   "types": [
     {
       "name": "Config",
-      "docs": [
-        "Конфигурация (админские параметры)"
-      ],
       "type": {
         "kind": "struct",
         "fields": [

@@ -14,8 +14,8 @@ const __dirname = path.dirname(__filename)
 
 dotenv.config()
 
-const PROGRAM_ID = new PublicKey('5gm1Nn7N3BDn2og4Umw5JePUhLUF2azKqwJduQx3tApg')
-const ADMIN_KEYPAIR_PATH = process.env.ADMIN_KEYPAIR_PATH || `${os.homedir()}/.config/solana/id.json`
+const PROGRAM_ID = new PublicKey('5PvnABfeQoqHGGGQ87BmjPCJ41wBuiSu3L3h4RbH4Zj1')
+const ADMIN_KEYPAIR_PATH = process.env.ADMIN_KEYPAIR_PATH || `${os.homedir()}/.config/solana/devnet.json`
 const RPC_URL = process.env.RPC_URL || 'http://127.0.0.1:8899'
 
 const idl = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../target/idl/nft_gifter.json'), 'utf-8'))

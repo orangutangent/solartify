@@ -31,8 +31,8 @@ pub struct MintNft<'info> {
 }
 
 pub fn _mint_nft(ctx: Context<MintNft>) -> Result<()> {
-    let config = &ctx.accounts.config;
-    let burn_amount = config.tokens_per_claim;
+    let decimals = ctx.accounts.token_mint.decimals;
+    let burn_amount = 10u64.pow(decimals as u32); // 1 token with  decimals
     let burn_accounts = Burn {
         mint: ctx.accounts.token_mint.to_account_info(),
         from: ctx.accounts.user_token_account.to_account_info(),

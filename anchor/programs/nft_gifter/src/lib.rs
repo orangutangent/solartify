@@ -13,7 +13,7 @@ use instructions::{
     mint::*
 };
 
-declare_id!("5gm1Nn7N3BDn2og4Umw5JePUhLUF2azKqwJduQx3tApg");
+declare_id!("5PvnABfeQoqHGGGQ87BmjPCJ41wBuiSu3L3h4RbH4Zj1");
 
 #[program]
 pub mod nft_gifter {
@@ -42,8 +42,8 @@ pub mod nft_gifter {
         _withdraw_sol(ctx, amount)
     }
 
-    pub fn purchase_tokens(ctx: Context<PurchaseTokens>) -> Result<()> {
-        _purchase_tokens(ctx)
+    pub fn purchase_tokens(ctx: Context<PurchaseTokens>, amount: u64) -> Result<()> {
+        _purchase_tokens(ctx, amount)
     }
 
     pub fn claim_tokens(ctx: Context<ClaimTokens>) -> Result<()> {
