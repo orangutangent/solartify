@@ -20,7 +20,7 @@ export function AccountButtons({ address }: { address: string | PublicKey }) {
   const { mutateAsync, isPending } = useRequestAirdropMutation({ address })
   return (
     <div className="space-x-2">
-      <Button onClick={() => mutateAsync(1)} disabled={isPending} variant="outline">
+      <Button onClick={() => mutateAsync(1)} disabled={isPending}>
         {isPending ? 'Airdropping...' : 'Airdrop 1 SOL'}
       </Button>
     </div>

@@ -1,6 +1,6 @@
-# 🎁 NFT Gifter
+# 🎨 SolArtify
 
-**NFT Gifter** is a Solana dApp that lets users mint NFTs by _burning_ custom tokens they can **claim daily** (for a small SOL fee) or **buy directly** with SOL.
+**SolArtify** is a Solana dApp for AI NFT generation, minting, and sharing. Users can claim or buy tokens, then use them to mint unique NFTs — and soon, generate art with AI!
 
 Built with:
 

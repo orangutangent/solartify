@@ -1,7 +1,7 @@
 'use client'
 
 import { useClaimStore } from '../store/claim.store'
-import { Spinner } from '../../../components/ui/spinner'
+import { Spinner } from '../../ui/spinner'
 
 export function ClaimStatus() {
   const { status, cooldown } = useClaimStore()

@@ -8,7 +8,7 @@ export function NftgifterUI() {
   const wallet = useWallet()
 
   if (!wallet.publicKey) {
-    return <div className="text-center text-zinc-400">Connect your wallet to use NFT Gifter</div>
+    return <div className="text-center text-zinc-400">Connect your wallet to use SolArtify</div>
   }
 
   if (configQuery?.isLoading) {
@@ -28,7 +28,7 @@ export function NftgifterUI() {
   return (
     <div className="max-w-md mx-auto flex flex-col gap-6 p-6 bg-gradient-to-br from-zinc-900 to-zinc-800 rounded-2xl shadow-xl border border-zinc-700 mt-8">
       <div className="flex flex-col gap-2">
-        <div className="text-xl font-bold text-white mb-2">NFT Gifter</div>
+        <div className="text-xl font-bold text-white mb-2">SolArtify</div>
         <div className="text-sm text-zinc-400">
           <div>
             Admin: <span className="font-mono text-zinc-200">{config?.owner.toString() ?? '—'}</span>

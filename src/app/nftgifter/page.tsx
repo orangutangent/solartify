@@ -1,6 +1,6 @@
 'use client'
-import NftgifterFeature from '@/components/nftgifter/nftgifter-feature'
+import SolArtifyFeature from '@/components/nftgifter/nftgifter-feature'
 
 export default function Page() {
-  return <NftgifterFeature />
+  return <SolArtifyFeature />
 }

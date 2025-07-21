@@ -1,0 +1,372 @@
+{
+    "designSystem": {
+        "name": "NFT Gifter Design System",
+        "version": "1.0.0",
+        "description": "Modern Web3/Crypto design system for Solana dApp with dark theme, gradients, and neon accents",
+        "colors": {
+            "primary": {
+                "50": "#f0f9ff",
+                "100": "#e0f2fe",
+                "200": "#bae6fd",
+                "300": "#7dd3fc",
+                "400": "#38bdf8",
+                "500": "#0ea5e9",
+                "600": "#0284c7",
+                "700": "#0369a1",
+                "800": "#075985",
+                "900": "#0c4a6e"
+            },
+            "secondary": {
+                "50": "#fdf4ff",
+                "100": "#fae8ff",
+                "200": "#f5d0fe",
+                "300": "#f0abfc",
+                "400": "#e879f9",
+                "500": "#d946ef",
+                "600": "#c026d3",
+                "700": "#a21caf",
+                "800": "#86198f",
+                "900": "#701a75"
+            },
+            "accent": {
+                "neon-blue": "#00d4ff",
+                "neon-purple": "#a855f7",
+                "neon-green": "#10b981",
+                "neon-pink": "#f472b6",
+                "neon-orange": "#fb923c"
+            },
+            "background": {
+                "primary": "#0a0a0a",
+                "secondary": "#111111",
+                "tertiary": "#1a1a1a",
+                "glass": "rgba(255, 255, 255, 0.05)",
+                "card": "rgba(17, 17, 17, 0.8)",
+                "modal": "rgba(0, 0, 0, 0.9)"
+            },
+            "text": {
+                "primary": "#ffffff",
+                "secondary": "#a1a1aa",
+                "muted": "#71717a",
+                "accent": "#00d4ff"
+            },
+            "status": {
+                "success": "#10b981",
+                "error": "#ef4444",
+                "warning": "#f59e0b",
+                "info": "#3b82f6",
+                "pending": "#a855f7"
+            },
+            "border": {
+                "primary": "rgba(255, 255, 255, 0.1)",
+                "secondary": "rgba(255, 255, 255, 0.05)",
+                "glow": "rgba(0, 212, 255, 0.3)"
+            }
+        },
+        "typography": {
+            "fonts": {
+                "primary": "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                "mono": "'JetBrains Mono', 'Fira Code', Consolas, monospace",
+                "display": "'Space Grotesk', Inter, sans-serif"
+            },
+            "sizes": {
+                "xs": "0.75rem",
+                "sm": "0.875rem",
+                "base": "1rem",
+                "lg": "1.125rem",
+                "xl": "1.25rem",
+                "2xl": "1.5rem",
+                "3xl": "1.875rem",
+                "4xl": "2.25rem",
+                "5xl": "3rem"
+            },
+            "weights": {
+                "light": 300,
+                "normal": 400,
+                "medium": 500,
+                "semibold": 600,
+                "bold": 700
+            }
+        },
+        "spacing": {
+            "xs": "0.25rem",
+            "sm": "0.5rem",
+            "md": "1rem",
+            "lg": "1.5rem",
+            "xl": "2rem",
+            "2xl": "3rem",
+            "3xl": "4rem"
+        },
+        "borderRadius": {
+            "none": "0",
+            "sm": "0.25rem",
+            "md": "0.5rem",
+            "lg": "0.75rem",
+            "xl": "1rem",
+            "2xl": "1.5rem",
+            "full": "9999px"
+        },
+        "shadows": {
+            "sm": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+            "md": "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+            "lg": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+            "glow": "0 0 20px rgba(0, 212, 255, 0.3)",
+            "glow-purple": "0 0 20px rgba(168, 85, 247, 0.3)",
+            "glow-green": "0 0 20px rgba(16, 185, 129, 0.3)"
+        },
+        "components": {
+            "Button": {
+                "description": "Interactive button component with multiple variants and animations",
+                "variants": {
+                    "primary": {
+                        "background": "linear-gradient(135deg, #0ea5e9, #a855f7)",
+                        "hoverBackground": "linear-gradient(135deg, #0284c7, #9333ea)",
+                        "textColor": "#ffffff",
+                        "border": "none",
+                        "shadow": "glow",
+                        "animation": "hover-lift, glow-pulse"
+                    },
+                    "secondary": {
+                        "background": "rgba(255, 255, 255, 0.05)",
+                        "hoverBackground": "rgba(255, 255, 255, 0.1)",
+                        "textColor": "#ffffff",
+                        "border": "1px solid rgba(255, 255, 255, 0.1)",
+                        "animation": "hover-lift"
+                    },
+                    "ghost": {
+                        "background": "transparent",
+                        "hoverBackground": "rgba(255, 255, 255, 0.05)",
+                        "textColor": "#a1a1aa",
+                        "border": "none",
+                        "animation": "hover-lift"
+                    },
+                    "danger": {
+                        "background": "linear-gradient(135deg, #ef4444, #dc2626)",
+                        "hoverBackground": "linear-gradient(135deg, #dc2626, #b91c1c)",
+                        "textColor": "#ffffff",
+                        "shadow": "0 0 20px rgba(239, 68, 68, 0.3)",
+                        "animation": "hover-lift"
+                    }
+                },
+                "sizes": {
+                    "sm": {
+                        "padding": "0.5rem 1rem",
+                        "fontSize": "0.875rem"
+                    },
+                    "md": {
+                        "padding": "0.75rem 1.5rem",
+                        "fontSize": "1rem"
+                    },
+                    "lg": {
+                        "padding": "1rem 2rem",
+                        "fontSize": "1.125rem"
+                    }
+                },
+                "states": {
+                    "loading": "spinner animation + disabled state",
+                    "disabled": "opacity 0.5 + no interactions"
+                }
+            },
+            "Card": {
+                "description": "Flexible card container with glassmorphism effect",
+                "variants": {
+                    "default": {
+                        "background": "rgba(17, 17, 17, 0.8)",
+                        "border": "1px solid rgba(255, 255, 255, 0.1)",
+                        "borderRadius": "1rem",
+                        "backdrop": "blur(10px)",
+                        "padding": "1.5rem"
+                    },
+                    "nft": {
+                        "background": "linear-gradient(135deg, rgba(17, 17, 17, 0.9), rgba(26, 26, 26, 0.9))",
+                        "border": "1px solid rgba(0, 212, 255, 0.2)",
+                        "borderRadius": "1rem",
+                        "backdrop": "blur(10px)",
+                        "animation": "hover-glow"
+                    },
+                    "stats": {
+                        "background": "rgba(255, 255, 255, 0.05)",
+                        "border": "1px solid rgba(255, 255, 255, 0.1)",
+                        "borderRadius": "0.75rem",
+                        "padding": "1rem"
+                    }
+                }
+            },
+            "Modal": {
+                "description": "Overlay modal for transactions and confirmations",
+                "structure": {
+                    "overlay": {
+                        "background": "rgba(0, 0, 0, 0.9)",
+                        "backdrop": "blur(5px)",
+                        "animation": "fade-in"
+                    },
+                    "content": {
+                        "background": "rgba(17, 17, 17, 0.95)",
+                        "border": "1px solid rgba(255, 255, 255, 0.1)",
+                        "borderRadius": "1.5rem",
+                        "backdrop": "blur(20px)",
+                        "animation": "slide-up-fade"
+                    }
+                }
+            },
+            "Input": {
+                "description": "Form input with focus states and validation",
+                "variants": {
+                    "default": {
+                        "background": "rgba(255, 255, 255, 0.05)",
+                        "border": "1px solid rgba(255, 255, 255, 0.1)",
+                        "focusBorder": "1px solid #00d4ff",
+                        "borderRadius": "0.5rem",
+                        "padding": "0.75rem 1rem",
+                        "textColor": "#ffffff",
+                        "placeholder": "#71717a"
+                    },
+                    "error": {
+                        "border": "1px solid #ef4444",
+                        "focusBorder": "1px solid #ef4444",
+                        "shadow": "0 0 10px rgba(239, 68, 68, 0.2)"
+                    }
+                }
+            },
+            "Toast": {
+                "description": "Notification component for transaction status",
+                "variants": {
+                    "success": {
+                        "background": "rgba(16, 185, 129, 0.1)",
+                        "border": "1px solid rgba(16, 185, 129, 0.3)",
+                        "icon": "check-circle",
+                        "iconColor": "#10b981"
+                    },
+                    "error": {
+                        "background": "rgba(239, 68, 68, 0.1)",
+                        "border": "1px solid rgba(239, 68, 68, 0.3)",
+                        "icon": "x-circle",
+                        "iconColor": "#ef4444"
+                    },
+                    "pending": {
+                        "background": "rgba(168, 85, 247, 0.1)",
+                        "border": "1px solid rgba(168, 85, 247, 0.3)",
+                        "icon": "spinner",
+                        "iconColor": "#a855f7"
+                    }
+                },
+                "animation": "slide-in-right, auto-dismiss"
+            },
+            "WalletWidget": {
+                "description": "Wallet connection and balance display widget",
+                "states": {
+                    "disconnected": {
+                        "action": "Connect Wallet button",
+                        "style": "primary variant"
+                    },
+                    "connecting": {
+                        "action": "Loading spinner",
+                        "text": "Connecting..."
+                    },
+                    "connected": {
+                        "display": "address (truncated) + balance + disconnect",
+                        "style": "secondary variant with dropdown"
+                    }
+                }
+            },
+            "NFTPreview": {
+                "description": "NFT display component with metadata",
+                "structure": {
+                    "image": "aspect-square, rounded corners, loading placeholder",
+                    "metadata": "title, collection, price/status",
+                    "actions": "claim/purchase buttons",
+                    "rarity": "rarity indicator with colored border"
+                },
+                "animations": {
+                    "hover": "scale-105 + glow effect",
+                    "loading": "skeleton animation",
+                    "claimed": "success pulse animation"
+                }
+            },
+            "TransactionStatus": {
+                "description": "Real-time transaction status indicator",
+                "states": {
+                    "pending": {
+                        "icon": "animated spinner",
+                        "color": "#a855f7",
+                        "text": "Transaction pending..."
+                    },
+                    "confirmed": {
+                        "icon": "check with animation",
+                        "color": "#10b981",
+                        "text": "Transaction confirmed"
+                    },
+                    "failed": {
+                        "icon": "x with shake animation",
+                        "color": "#ef4444",
+                        "text": "Transaction failed"
+                    }
+                }
+            }
+        },
+        "animations": {
+            "hover-lift": {
+                "transform": "translateY(-2px)",
+                "transition": "transform 0.2s ease"
+            },
+            "glow-pulse": {
+                "animation": "glow 2s infinite alternate"
+            },
+            "fade-in": {
+                "keyframes": "opacity 0 to 1",
+                "duration": "0.3s",
+                "easing": "ease-out"
+            },
+            "slide-up-fade": {
+                "keyframes": "translateY(20px) opacity(0) to translateY(0) opacity(1)",
+                "duration": "0.4s",
+                "easing": "cubic-bezier(0.4, 0, 0.2, 1)"
+            },
+            "slide-in-right": {
+                "keyframes": "translateX(100%) to translateX(0)",
+                "duration": "0.3s",
+                "easing": "ease-out"
+            },
+            "spinner": {
+                "animation": "spin 1s linear infinite"
+            },
+            "success-pulse": {
+                "animation": "scale 1 to 1.05 to 1",
+                "duration": "0.6s",
+                "easing": "ease-out"
+            }
+        },
+        "breakpoints": {
+            "sm": "640px",
+            "md": "768px",
+            "lg": "1024px",
+            "xl": "1280px",
+            "2xl": "1536px"
+        },
+        "uxPatterns": {
+            "walletConnection": {
+                "pattern": "Prominent connect button → Loading state → Connected widget with balance",
+                "feedback": "Toast notifications for connection status"
+            },
+            "transactionFlow": {
+                "pattern": "Action button → Confirmation modal → Pending state → Success/Error feedback",
+                "feedback": "Real-time status updates with visual indicators"
+            },
+            "nftClaiming": {
+                "pattern": "Preview → Claim button → Wallet confirmation → Transaction status → Success state",
+                "feedback": "Progress indicators and state changes"
+            },
+            "responsiveDesign": {
+                "mobile": "Stack layout, full-width cards, bottom sheet modals",
+                "desktop": "Grid layouts, sidebar navigation, overlay modals"
+            }
+        },
+        "implementationNotes": {
+            "framework": "React + TypeScript + Tailwind CSS",
+            "animations": "Framer Motion for complex animations, CSS transitions for simple ones",
+            "stateManagement": "React hooks (useState, useReducer) for component state",
+            "responsive": "Mobile-first approach with Tailwind responsive utilities",
+            "accessibility": "Focus management, ARIA labels, keyboard navigation",
+            "performance": "Lazy loading for NFT images, memoization for expensive components"
+        }
+    }
+}

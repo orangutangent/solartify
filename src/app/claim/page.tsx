@@ -1,7 +1,7 @@
-import { ClaimForm } from '../../features/claim/ui/ClaimForm'
-import { ClaimStatus } from '../../features/claim/ui/ClaimStatus'
-import { TokenBalanceWidget } from '../../features/claim/ui/TokenBalanceWidget'
-import { ClaimCooldownWidget } from '../../features/claim/ui/ClaimCooldownWidget'
+import { ClaimForm } from '../../components/claim/ui/ClaimForm'
+import { ClaimStatus } from '../../components/claim/ui/ClaimStatus'
+import { TokenBalanceWidget } from '../../components/claim/ui/TokenBalanceWidget'
+import { ClaimCooldownWidget } from '../../components/claim/ui/ClaimCooldownWidget'
 
 export default function ClaimPage() {
   return (

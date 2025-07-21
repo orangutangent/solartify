@@ -5,25 +5,46 @@ import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js'
 // Баланс SOL
 export function useGetBalanceQuery({ address }: { address: string | PublicKey }) {
   const { connection } = useConnection()
-  const pubkey = typeof address === 'string' ? new PublicKey(address) : address
+  let pubkey: PublicKey | undefined = undefined
+  if (typeof address === 'string') {
+    try {
+      if (address) pubkey = new PublicKey(address)
+    } catch {
+      pubkey = undefined
+    }
+  } else if (address instanceof PublicKey) {
+    pubkey = address
+  }
   return useQuery({
-    queryKey: ['get-balance', pubkey.toString()],
-    queryFn: () => connection.getBalance(pubkey),
+    queryKey: ['get-balance', pubkey?.toString() ?? ''],
+    queryFn: () => (pubkey ? connection.getBalance(pubkey) : Promise.resolve(0)),
+    enabled: !!pubkey,
   })
 }
 
 // Токены (SPL)
 export function useGetTokenAccountsQuery({ address }: { address: string | PublicKey }) {
   const { connection } = useConnection()
-  const pubkey = typeof address === 'string' ? new PublicKey(address) : address
+  let pubkey: PublicKey | undefined = undefined
+  if (typeof address === 'string') {
+    try {
+      if (address) pubkey = new PublicKey(address)
+    } catch {
+      pubkey = undefined
+    }
+  } else if (address instanceof PublicKey) {
+    pubkey = address
+  }
   return useQuery({
-    queryKey: ['get-token-accounts', pubkey.toString()],
+    queryKey: ['get-token-accounts', pubkey?.toString() ?? ''],
     queryFn: async () => {
+      if (!pubkey) return []
       const res = await connection.getParsedTokenAccountsByOwner(pubkey, {
         programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
       })
       return res.value
     },
+    enabled: !!pubkey,
   })
 }
 

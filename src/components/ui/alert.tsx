@@ -1,51 +1,54 @@
 import * as React from 'react'
-import { cva, type VariantProps } from 'class-variance-authority'
+import { CheckCircle, XCircle, Loader2, Info } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
-import { cn } from '@/lib/utils'
-
-const alertVariants = cva(
-  'relative w-full rounded-lg border px-4 py-3 text-sm grid has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>svg]:gap-x-3 gap-y-0.5 items-start [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current',
-  {
-    variants: {
-      variant: {
-        default: 'bg-card text-card-foreground',
-        destructive:
-          'text-destructive bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90',
-        warning:
-          'text-yellow-500 bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-yellow-500/90 border-yellow-500 dark:bg-yellow-900/10',
-      },
-    },
-    defaultVariants: {
-      variant: 'default',
-    },
-  },
-)
-
-function Alert({ className, variant, ...props }: React.ComponentProps<'div'> & VariantProps<typeof alertVariants>) {
-  return <div data-slot="alert" role="alert" className={cn(alertVariants({ variant }), className)} {...props} />
+export interface ToastProps {
+  type: 'success' | 'error' | 'info' | 'pending'
+  message: string
+  onClose: () => void
+  duration?: number // ms
 }
 
-function AlertTitle({ className, ...props }: React.ComponentProps<'div'>) {
+const icons = {
+  success: <CheckCircle className="text-green-400 w-5 h-5" />,
+  error: <XCircle className="text-red-400 w-5 h-5" />,
+  info: <Info className="text-accent-neon w-5 h-5" />,
+  pending: <Loader2 className="text-fuchsia-400 w-5 h-5 animate-spin" />,
+}
+
+const bgClasses = {
+  success: 'bg-green-900/80 border-green-400/30',
+  error: 'bg-red-900/80 border-red-400/30',
+  info: 'bg-accent-neon/10 border-accent-neon/30',
+  pending: 'bg-fuchsia-900/80 border-fuchsia-400/30',
+}
+
+export const Toast: React.FC<ToastProps> = ({ type, message, onClose, duration = 3500 }) => {
+  React.useEffect(() => {
+    const timer = setTimeout(onClose, duration)
+    return () => clearTimeout(timer)
+  }, [onClose, duration])
+
   return (
-    <div
-      data-slot="alert-title"
-      className={cn('col-start-2 line-clamp-1 min-h-4 font-medium tracking-tight', className)}
-      {...props}
-    />
+    <AnimatePresence>
+      <motion.div
+        initial={{ x: 320, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        exit={{ x: 320, opacity: 0 }}
+        transition={{ duration: 0.3 }}
+        className={`fixed top-6 right-6 z-50 min-w-[240px] max-w-xs px-4 py-3 rounded-xl border shadow-lg flex items-center gap-3 ${bgClasses[type]}`}
+        role="alert"
+      >
+        {icons[type]}
+        <span className="text-white text-sm font-medium flex-1">{message}</span>
+        <button
+          onClick={onClose}
+          className="ml-2 text-zinc-400 hover:text-white transition-colors rounded-full p-1 focus:outline-none"
+          aria-label="Close notification"
+        >
+          <XCircle className="w-4 h-4" />
+        </button>
+      </motion.div>
+    </AnimatePresence>
   )
 }
-
-function AlertDescription({ className, ...props }: React.ComponentProps<'div'>) {
-  return (
-    <div
-      data-slot="alert-description"
-      className={cn(
-        'text-muted-foreground col-start-2 grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed',
-        className,
-      )}
-      {...props}
-    />
-  )
-}
-
-export { Alert, AlertTitle, AlertDescription }

@@ -1,9 +1,9 @@
-import { NftgifterUI } from './nftgifter-ui'
+import { NftgifterUI as SolArtifyUI } from './nftgifter-ui'
 
-export default function NftgifterFeature() {
+export default function SolArtifyFeature() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh]">
-      <NftgifterUI />
+      <SolArtifyUI />
     </div>
   )
 }

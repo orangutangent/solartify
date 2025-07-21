@@ -1,5 +1,5 @@
 'use client'
-import { BuyTokensWidget } from '@/features/buy/BuyTokensWidget'
+import { BuyTokensWidget } from '@/components/buy/BuyTokensWidget'
 
 export default function BuyPage() {
   return (

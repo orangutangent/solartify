@@ -1,21 +1,8 @@
-import { AlertCircle } from 'lucide-react'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Toast } from '@/components/ui/alert'
 import { ReactNode } from 'react'
 
-export function AppAlert({
-  action,
-  children,
-  className = '',
-}: {
-  action: ReactNode
-  children: ReactNode
-  className?: string
-}) {
+export function AppAlert({ children }: { children: ReactNode }) {
   return (
-    <Alert variant="warning" className={className}>
-      <AlertCircle className="h-4 w-4" />
-      <AlertTitle>{children}</AlertTitle>
-      <AlertDescription className="flex justify-end">{action}</AlertDescription>
-    </Alert>
+    <Toast type="info" message={typeof children === 'string' ? children : ''} onClose={() => {}} duration={999999} />
   )
 }
