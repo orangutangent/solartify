@@ -4,6 +4,7 @@ import { irysUploader } from '@metaplex-foundation/umi-uploader-irys'
 import { createGenericFile, createSignerFromKeypair, signerIdentity } from '@metaplex-foundation/umi'
 
 export const runtime = 'nodejs'
+// export const runtime = 'edge';
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,8 +15,7 @@ export async function POST(req: NextRequest) {
 
     console.log('Received upload request:', { name, description: description?.substring(0, 50) + '...' })
 
-    const umi = createUmi(process.env.NEXT_PUBLIC_UMI_RPC!)
-      .use(irysUploader({ address: 'https://devnet.irys.xyz' }))
+    const umi = createUmi(process.env.NEXT_PUBLIC_UMI_RPC!).use(irysUploader({ address: 'https://devnet.irys.xyz' }))
 
     // 1. Load the server wallet's secret key from .env.local
     const serverWalletSecretKey = process.env.SERVER_WALLET_SECRET_KEY
