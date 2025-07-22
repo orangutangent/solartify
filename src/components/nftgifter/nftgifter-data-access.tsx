@@ -3,7 +3,7 @@
 
 import { useConnection } from '@solana/wallet-adapter-react'
 import { useWallet } from '@solana/wallet-adapter-react'
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { AnchorProvider, Program, Idl, Wallet as AnchorWallet } from '@coral-xyz/anchor'
 import idl from '@/lib/idl.json'
@@ -46,6 +46,7 @@ export function useNftGifterProgram() {
     return new AnchorProvider(connection, wallet, { preflightCommitment: 'confirmed' })
   }, [connection, wallet])
   const program = useMemo(() => (provider ? new Program<NftGifter>(idl as Idl, provider) : null), [provider, programId])
+  const queryClient = useQueryClient()
 
   // Get config
   const configQuery = useQuery({
@@ -85,10 +86,32 @@ export function useNftGifterProgram() {
         .rpc()
       return tx
     },
-    onSuccess: (tx) => toast.success('Claimed! Tx: ' + tx),
+    onSuccess: (tx) => {
+      toast.success('Claimed! Tx: ' + tx)
+      queryClient.invalidateQueries({ queryKey: ['user-token-balance', wallet.publicKey?.toBase58()] })
+    },
     onError: (e) => toast.error('Claim failed: ' + (e instanceof Error ? e.message : String(e))),
     // mutation неактивна если нет wallet
     // enabled: !!program && !!wallet && !!wallet.publicKey,
+  })
+
+  // Get user's utility token balance
+  const userUtilityTokenBalanceQuery = useQuery({
+    queryKey: ['user-token-balance', wallet.publicKey?.toBase58()],
+    queryFn: async () => {
+      if (!wallet.publicKey) return 0
+      const mintPubkey = new PublicKey(process.env.NEXT_PUBLIC_MINT_PUBKEY!)
+      const userTokenAccountAddress = await getAssociatedTokenAddress(mintPubkey, wallet.publicKey)
+      try {
+        const accountInfo = await connection.getTokenAccountBalance(userTokenAccountAddress)
+        return Number(accountInfo.value.amount) / 10 ** accountInfo.value.decimals
+      } catch (e) {
+        // Account might not exist yet, return 0
+        return 0
+      }
+    },
+    enabled: !!wallet.publicKey,
+    refetchInterval: 5000, // Refetch every 5 seconds
   })
 
   // Mint NFT
@@ -221,6 +244,7 @@ export function useNftGifterProgram() {
     claimTokens,
     mintNft,
     purchaseTokens,
+    userUtilityTokenBalanceQuery,
     // uploadImage,
     // ...другие хуки
   }
