@@ -20,20 +20,17 @@ export default function MintPage() {
   const [sendStatus, setSendStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [showSendModal, setShowSendModal] = useState(false)
   const { mintNft } = useNftGifterProgram()
-  // const uploadMetadata = useUploadMetadata()
+  const uploadMetadata = useUploadMetadata()
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function handleMint({ image, name, description }: { image: string; name: string; description: string }) {
     setMinting(true)
     setMintStatus('idle')
     try {
-      // ВРЕМЕННО: Пропускаем загрузку и используем заглушки
-      console.log('Skipping upload, using mock data...')
-      const mockName = 'monk smok'
-      const mockMetadataUri = 'https://gateway.irys.xyz/7uRtBCyFYBWSETDVAFn9ANrD1mZTgrpNXG9GGHWrdj4r'
-
-      // 2. Минт NFT с ссылкой на метаданные
-      await mintNft.mutateAsync({ name: mockName, description, metadataUri: mockMetadataUri })
+      // 1. Upload image and metadata to the server
+      const metadataUri = await uploadMetadata.mutateAsync({ image, name, description })
+      // 2. Mint NFT with metadata URI
+      await mintNft.mutateAsync({ name, description, metadataUri })
       setMintStatus('success')
     } catch (e) {
       setMintStatus('error')
@@ -91,7 +88,7 @@ export default function MintPage() {
             handleSendNft={handleSendNft}
           />
         )}
-        {/* Информация */}
+        {/* Information */}
         <Card className="flex flex-col items-center p-6 gap-2">
           <span className="flex items-center gap-2 text-zinc-400 text-sm">
             <Info className="w-5 h-5 text-accent-neon" /> Info

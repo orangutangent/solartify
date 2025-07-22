@@ -7,7 +7,14 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { AnchorProvider, Program, Idl, Wallet as AnchorWallet } from '@coral-xyz/anchor'
 import idl from '@/lib/idl.json'
-import { Keypair, PublicKey, SystemProgram, Transaction } from '@solana/web3.js'
+import {
+  Keypair,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+  SYSVAR_RENT_PUBKEY,
+  ComputeBudgetProgram,
+} from '@solana/web3.js'
 import { toast } from 'sonner'
 import { findConfigPda, findUserClaimPda } from '@/lib/solanaConnection'
 import {
@@ -25,8 +32,9 @@ import { NftGifter } from '@/types/nft_gifter'
 import BN from 'bn.js'
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
 import { walletAdapterIdentity } from '@metaplex-foundation/umi-signer-wallet-adapters'
-import { mplTokenMetadata, createV1, TokenStandard } from '@metaplex-foundation/mpl-token-metadata'
-import { publicKey, percentAmount } from '@metaplex-foundation/umi'
+import { mplTokenMetadata, createMetadataAccountV3, TokenStandard } from '@metaplex-foundation/mpl-token-metadata'
+import { transactionBuilder, publicKey, percentAmount, generateSigner } from '@metaplex-foundation/umi'
+import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes'
 // import * as anchor from '@coral-xyz/anchor'
 
 export function useNftGifterProgram() {
@@ -39,7 +47,7 @@ export function useNftGifterProgram() {
   }, [connection, wallet])
   const program = useMemo(() => (provider ? new Program<NftGifter>(idl as Idl, provider) : null), [provider, programId])
 
-  // Получить конфиг
+  // Get config
   const configQuery = useQuery({
     queryKey: ['nftgifter-config', { programId }],
     queryFn: async () => {
@@ -53,7 +61,7 @@ export function useNftGifterProgram() {
     enabled: !!program && !!wallet && !!wallet.publicKey,
   })
 
-  // Claim токенов
+  // Claim tokens
   const claimTokens = useMutation({
     mutationKey: ['nftgifter-claim', { programId }],
     mutationFn: async () => {
@@ -86,101 +94,83 @@ export function useNftGifterProgram() {
   // Mint NFT
   const mintNft = useMutation({
     mutationKey: ['nftgifter-mint-nft', { programId }],
-    mutationFn: async ({ name, metadataUri }: { name: string; description: string; metadataUri: string }) => {
+    mutationFn: async ({
+      name,
+      description,
+      metadataUri,
+    }: {
+      name: string
+      description: string
+      metadataUri: string
+    }) => {
       try {
         if (!program || !wallet || !wallet.publicKey) throw new Error('No wallet/program')
         if (!metadataUri) throw new Error('Metadata URI is required')
 
-        console.log('Starting classic mint process with:', { name, metadataUri })
+        console.log('Starting Anchor-driven NFT mint process with:', { name, description, metadataUri })
 
-        // 1. Генерируем Keypair для нового NFT. Он будет подписывать создание своего аккаунта.
+        // 1. Generate Keypair for the new NFT. It will sign its own account creation.
         const nftMintKeypair = Keypair.generate()
         console.log('Generated new mint keypair:', nftMintKeypair.publicKey.toBase58())
 
-        // 2. Создаем транзакцию
-        const transaction = new Transaction()
-
-        // 3. Инструкция для создания аккаунта под mint
-        const lamports = await getMinimumBalanceForRentExemptMint(connection)
-        transaction.add(
-          SystemProgram.createAccount({
-            fromPubkey: wallet.publicKey, // Плательщик - пользователь
-            newAccountPubkey: nftMintKeypair.publicKey,
-            space: MINT_SIZE,
-            lamports,
-            programId: TOKEN_PROGRAM_ID,
-          }),
+        // Add instructions to increase Compute Units limit
+        const transaction = new Transaction().add(
+          ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }),
+          ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 1 }),
         )
 
-        // 4. Инструкция для инициализации mint'а
-        transaction.add(
-          createInitializeMintInstruction(
-            nftMintKeypair.publicKey,
-            0, // Decimals
-            wallet.publicKey, // Mint Authority
-            wallet.publicKey, // Freeze Authority
-          ),
+        // 2. Calculate PDA for Metadata and Master Edition
+        // IMPORTANT: If your contract uses different seeds for PDA, adjust them here!
+        const [nftMetadataPda] = PublicKey.findProgramAddressSync(
+          [
+            Buffer.from('metadata'),
+            new PublicKey(process.env.NEXT_PUBLIC_METAPLEX_PROGRAM_ID!).toBuffer(),
+            nftMintKeypair.publicKey.toBuffer(),
+          ],
+          new PublicKey(process.env.NEXT_PUBLIC_METAPLEX_PROGRAM_ID!),
+        )
+        const [masterEditionPda] = PublicKey.findProgramAddressSync(
+          [
+            Buffer.from('metadata'),
+            new PublicKey(process.env.NEXT_PUBLIC_METAPLEX_PROGRAM_ID!).toBuffer(),
+            nftMintKeypair.publicKey.toBuffer(),
+            Buffer.from('edition'),
+          ],
+          new PublicKey(process.env.NEXT_PUBLIC_METAPLEX_PROGRAM_ID!),
         )
 
-        // 5. Инструкция для создания ATA для NFT
-        const userNftAta = await getAssociatedTokenAddress(nftMintKeypair.publicKey, wallet.publicKey)
-        transaction.add(
-          createAssociatedTokenAccountInstruction(
-            wallet.publicKey, // Плательщик
-            userNftAta,
-            wallet.publicKey, // Владелец ATA
-            nftMintKeypair.publicKey, // Mint
-          ),
-        )
+        // 3. Get ATA for NFT (Anchor will create it if needed)
+        const userNftAccount = await getAssociatedTokenAddress(nftMintKeypair.publicKey, wallet.publicKey)
 
-        // 6. Ваша Anchor-инструкция
-        const [configPda] = findConfigPda(ADMIN_PUBKEY_PK, programId)
+        // 4. Get ATA for utility token
         const utilityTokenMint = new PublicKey(process.env.NEXT_PUBLIC_MINT_PUBKEY!)
         const userUtilityTokenAta = await getAssociatedTokenAddress(utilityTokenMint, wallet.publicKey)
 
-        const anchorInstruction = await program.methods
-          .mintNft()
+        const [configPda] = await findConfigPda(ADMIN_PUBKEY_PK, program.programId)
+
+        // 5. Call your Anchor mintNft instruction
+        console.log('Calling Anchor mintNft instruction...')
+        const txSignature = await program.methods
+          .mintNft(name, 'GIFT', metadataUri) // Pass name, symbol, uri
           .accountsStrict({
             user: wallet.publicKey,
             config: configPda,
-            tokenMint: utilityTokenMint,
-            userTokenAccount: userUtilityTokenAta,
-            nftMint: nftMintKeypair.publicKey,
-            userNftAccount: userNftAta,
+            utilityTokenMint: utilityTokenMint,
+            userUtilityTokenAccount: userUtilityTokenAta,
+            nftMint: nftMintKeypair.publicKey, // Передаем publicKey сгенерированного Keypair
+            userNftAccount: userNftAccount,
+            nftMetadata: nftMetadataPda,
+            masterEditionAccount: masterEditionPda,
             tokenProgram: TOKEN_PROGRAM_ID,
             associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,
+            rent: SYSVAR_RENT_PUBKEY, // Add rent
+            metadataProgram: new PublicKey(process.env.NEXT_PUBLIC_METAPLEX_PROGRAM_ID!), // Add metadataProgram
           })
-          .instruction()
-        transaction.add(anchorInstruction)
-
-        // 7. Отправляем транзакцию
-        console.log('Sending transaction to create mint and call Anchor program...')
-        const { blockhash } = await connection.getLatestBlockhash()
-        transaction.recentBlockhash = blockhash
-        transaction.feePayer = wallet.publicKey
-
-        // Mint Keypair должен подписать создание своего аккаунта
-        transaction.partialSign(nftMintKeypair)
-
-        const signedTx = await wallet.signTransaction(transaction)
-        const txSignature = await connection.sendRawTransaction(signedTx.serialize())
+          .signers([nftMintKeypair]) // IMPORTANT: Add nftMintKeypair to signers
+          .rpc()
         await connection.confirmTransaction(txSignature, 'confirmed')
-        console.log('Transaction successful, signature:', txSignature)
-
-        // 8. Создание метаданных
-        console.log('Creating metadata...')
-        const umi = createUmi(connection.rpcEndpoint).use(walletAdapterIdentity(wallet)).use(mplTokenMetadata())
-
-        await createV1(umi, {
-          mint: publicKey(nftMintKeypair.publicKey.toBase58()),
-          authority: umi.identity,
-          name: name,
-          uri: metadataUri,
-          sellerFeeBasisPoints: percentAmount(5.5),
-          tokenStandard: TokenStandard.NonFungible,
-        }).sendAndConfirm(umi, { confirm: { commitment: 'confirmed' } })
-        console.log('Metadata created successfully')
+        console.log('Anchor mintNft successful, signature:', txSignature)
 
         return txSignature
       } catch (e) {

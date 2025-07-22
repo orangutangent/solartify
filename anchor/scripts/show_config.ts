@@ -22,7 +22,8 @@ if (!CONFIG_PDA_STR) {
 }
 
 const CONFIG_PDA = new PublicKey(CONFIG_PDA_STR)
-const RPC_URL = process.env.RPC_URL || 'http://127.0.0.1:8899'
+// const RPC_URL = process.env.RPC_URL || 'http://127.0.0.1:8899'
+const RPC_URL = process.env.RPC_URL || 'http://api.devnet.solana.com'
 
 const idl = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../target/idl/nft_gifter.json'), 'utf-8'))
 

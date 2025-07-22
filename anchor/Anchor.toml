@@ -8,11 +8,14 @@ skip-lint = false
 [programs.localnet]
 nft_gifter = "5PvnABfeQoqHGGGQ87BmjPCJ41wBuiSu3L3h4RbH4Zj1"
 
+[programs.devnet]
+nft_gifter = "5PvnABfeQoqHGGGQ87BmjPCJ41wBuiSu3L3h4RbH4Zj1"
+
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/devnet.json"
 
 [scripts]

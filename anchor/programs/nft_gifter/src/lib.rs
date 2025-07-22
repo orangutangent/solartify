@@ -51,7 +51,7 @@ pub mod nft_gifter {
         _claim_tokens(ctx, clock)
     }
 
-    pub fn mint_nft(ctx: Context<MintNft>) -> Result<()> {
-        _mint_nft(ctx)
+    pub fn mint_nft(ctx: Context<MintNft>, name: String, symbol: String, uri: String) -> Result<()> {
+        _mint_nft(ctx, name, symbol, uri)
     }
 }
