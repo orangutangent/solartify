@@ -32,9 +32,15 @@ import { NftGifter } from '@/types/nft_gifter'
 import BN from 'bn.js'
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
 import { walletAdapterIdentity } from '@metaplex-foundation/umi-signer-wallet-adapters'
-import { mplTokenMetadata, createMetadataAccountV3, TokenStandard } from '@metaplex-foundation/mpl-token-metadata'
-import { transactionBuilder, publicKey, percentAmount, generateSigner } from '@metaplex-foundation/umi'
-import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes'
+import {
+  mplTokenMetadata,
+  createMetadataAccountV3,
+  TokenStandard,
+  fetchMetadata,
+  fetchAllDigitalAssetWithTokenByOwner,
+} from '@metaplex-foundation/mpl-token-metadata'
+import { percentAmount, publicKey, Umi } from '@metaplex-foundation/umi'
+
 // import * as anchor from '@coral-xyz/anchor'
 
 export function useNftGifterProgram() {
@@ -112,6 +118,34 @@ export function useNftGifterProgram() {
     },
     enabled: !!wallet.publicKey,
     refetchInterval: 5000, // Refetch every 5 seconds
+  })
+
+  // Get user's NFTs
+  const userNftsQuery = useQuery({
+    queryKey: ['user-nfts', wallet.publicKey?.toBase58()],
+    queryFn: async () => {
+      if (!wallet.publicKey) return []
+      try {
+        const endpoint = connection.rpcEndpoint
+        const umi = createUmi(endpoint)
+
+        const allNFTs = await fetchAllDigitalAssetWithTokenByOwner(umi, publicKey(wallet.publicKey.toBase58()))
+
+        allNFTs.forEach((nft, index) => {
+          console.log(`\nNFT #${index + 1}:`)
+          console.log('Mint Address:', nft.publicKey)
+          console.log('Name:', nft.metadata.name)
+          console.log('Symbol:', nft.metadata.symbol)
+          console.log('URI:', nft.metadata.uri)
+        })
+
+        return allNFTs
+      } catch (e) {
+        console.log(e)
+      }
+    },
+    enabled: !!wallet.publicKey,
+    refetchInterval: 10000, // Refetch every 10 seconds
   })
 
   // Mint NFT
@@ -245,7 +279,13 @@ export function useNftGifterProgram() {
     mintNft,
     purchaseTokens,
     userUtilityTokenBalanceQuery,
+    userNftsQuery,
     // uploadImage,
     // ...другие хуки
   }
+}
+function fromWeb3JsPublicKey(
+  metadataPda: PublicKey,
+): import('@metaplex-foundation/umi-public-keys').PublicKey | import('@metaplex-foundation/umi-public-keys').Pda {
+  throw new Error('Function not implemented.')
 }

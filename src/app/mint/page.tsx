@@ -19,8 +19,10 @@ export default function MintPage() {
   const [sendAddress, setSendAddress] = useState('')
   const [sendStatus, setSendStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [showSendModal, setShowSendModal] = useState(false)
-  const { mintNft } = useNftGifterProgram()
+  const { mintNft, userNftsQuery } = useNftGifterProgram()
   const uploadMetadata = useUploadMetadata()
+
+  const { data: nfts, isLoading: nftsLoading, isError: nftsError } = userNftsQuery
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function handleMint({ image, name, description }: { image: string; name: string; description: string }) {
@@ -79,7 +81,7 @@ export default function MintPage() {
         {/* Gallery tab */}
         {tab === 'gallery' && (
           <ImageGallery
-            nfts={mockNfts}
+            nfts={nfts || []}
             showSendModal={showSendModal}
             setShowSendModal={setShowSendModal}
             sendAddress={sendAddress}

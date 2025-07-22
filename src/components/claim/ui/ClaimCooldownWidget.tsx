@@ -27,7 +27,7 @@ function useClaimCooldownQuery() {
       if (!account || !account.data) {
         return { canClaim: true, lastClaimTs: 0, nextClaimDate: null }
       }
-      // Декодируем lastClaimTs (первые 8 байт, little-endian, BN)
+      // Decode lastClaimTs (first 8 bytes, little-endian, BN)
       const lastClaimTs = Number(
         account.data.slice(8, 16).reduce((acc, b, i) => acc + BigInt(b) * (1n << (8n * BigInt(i))), 0n),
       )

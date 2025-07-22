@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useConnection } from '@solana/wallet-adapter-react'
 import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js'
 
-// Баланс SOL
+// SOL Balance
 export function useGetBalanceQuery({ address }: { address: string | PublicKey }) {
   const { connection } = useConnection()
   let pubkey: PublicKey | undefined = undefined
@@ -22,7 +22,7 @@ export function useGetBalanceQuery({ address }: { address: string | PublicKey })
   })
 }
 
-// Токены (SPL)
+// Tokens (SPL)
 export function useGetTokenAccountsQuery({ address }: { address: string | PublicKey }) {
   const { connection } = useConnection()
   let pubkey: PublicKey | undefined = undefined
@@ -48,7 +48,7 @@ export function useGetTokenAccountsQuery({ address }: { address: string | Public
   })
 }
 
-// Транзакции
+// Transactions
 export function useGetSignaturesQuery({ address }: { address: string | PublicKey }) {
   const { connection } = useConnection()
   const pubkey = typeof address === 'string' ? new PublicKey(address) : address
@@ -58,7 +58,7 @@ export function useGetSignaturesQuery({ address }: { address: string | PublicKey
   })
 }
 
-// Аирдроп (только devnet/testnet)
+// Airdrop (devnet/testnet only)
 export function useRequestAirdropMutation({ address }: { address: string | PublicKey }) {
   const { connection } = useConnection()
   const pubkey = typeof address === 'string' ? new PublicKey(address) : address

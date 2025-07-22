@@ -14,7 +14,7 @@ export async function getSolBalance(pubkey: PublicKey) {
 }
 
 export async function getTokenBalance(owner: PublicKey, mint: PublicKey) {
-  // Используйте getParsedTokenAccountsByOwner для получения баланса SPL токена
+  // Use getParsedTokenAccountsByOwner to get SPL token balance
   const accounts = await connection.getParsedTokenAccountsByOwner(owner, { mint })
   let amount = 0
   accounts.value.forEach((acc) => {

@@ -17,19 +17,19 @@ export async function POST(req: NextRequest) {
     const umi = createUmi(process.env.NEXT_PUBLIC_UMI_RPC!)
       .use(irysUploader({ address: 'https://devnet.irys.xyz' }))
 
-    // 1. Загружаем секретный ключ серверного кошелька из .env.local
+    // 1. Load the server wallet's secret key from .env.local
     const serverWalletSecretKey = process.env.SERVER_WALLET_SECRET_KEY
     if (!serverWalletSecretKey) {
       throw new Error('SERVER_WALLET_SECRET_KEY is not set in .env.local')
     }
 
-    // 2. Создаем Keypair и Signer для Umi из секретного ключа
+    // 2. Create Keypair and Signer for Umi from the secret key
     const secretKeyUint8Array = new Uint8Array(JSON.parse(serverWalletSecretKey))
     const serverKeypair = umi.eddsa.createKeypairFromSecretKey(secretKeyUint8Array)
     const serverSigner = createSignerFromKeypair(umi, serverKeypair)
     umi.use(signerIdentity(serverSigner))
 
-    // --- ДЛЯ DEVNET: Раскомментируйте, чтобы пополнить кошелек, если он пуст ---
+    // --- FOR DEVNET: Uncomment to airdrop SOL if the wallet is empty ---
     // const balance = await umi.rpc.getBalance(serverSigner.publicKey)
     // if (balance.basisPoints === 0n) {
     //   console.log(`Airdropping 1 SOL to ${serverSigner.publicKey}...`)
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     // }
     // ---------------------------------------------------------------------
 
-    // 3. Загрузка картинки
+    // 3. Upload image
     console.log('Uploading image to Irys...')
     const base64Data = image.split(',')[1]
     const buffer = Buffer.from(base64Data, 'base64')
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     if (!imageUri) throw new Error('Image upload failed')
     console.log('Image uploaded, URI:', imageUri)
 
-    // 4. Загрузка метаданных
+    // 4. Upload metadata
     console.log('Uploading metadata to Irys...')
     const metadata = {
       name,

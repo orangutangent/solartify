@@ -1,14 +1,13 @@
+'use client'
 import { Button } from '@/components/ui/button'
+import { DigitalAssetWithToken } from '@metaplex-foundation/mpl-token-metadata'
 import { Image as ImageIcon, Send, X } from 'lucide-react'
-
-interface Nft {
-  id: string
-  name: string
-  image: string
-}
+import { useEffect, useState } from 'react'
+import { getNftImageUrl } from '@/lib/utils'
+import Image from 'next/image'
 
 interface ImageGalleryProps {
-  nfts: Nft[]
+  nfts: DigitalAssetWithToken[]
   showSendModal: boolean
   setShowSendModal: (v: boolean) => void
   sendAddress: string
@@ -26,22 +25,41 @@ export function ImageGallery({
   sendStatus,
   handleSendNft,
 }: ImageGalleryProps) {
+  const [imageUrls, setImageUrls] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    nfts.forEach(async (nft) => {
+      if (nft.metadata.uri && !imageUrls[nft.token.publicKey]) {
+        const url = await getNftImageUrl(nft.metadata.uri)
+        if (url) {
+          setImageUrls((prev) => ({ ...prev, [nft.token.publicKey]: url }))
+        }
+      }
+    })
+  }, [nfts, imageUrls])
+
   return (
     <div className="flex flex-col gap-6 items-center">
       <div className="grid grid-cols-2 gap-4 w-full">
         {nfts.map((nft) => (
           <div
-            key={nft.id}
+            key={nft.token.publicKey}
             className="flex flex-col items-center gap-2 bg-white/5 border border-white/10 rounded-xl p-4 relative"
           >
             <div className="w-28 h-28 rounded-lg bg-zinc-900 flex items-center justify-center">
-              {nft.image ? (
-                <img src={nft.image} alt={nft.name} className="object-cover w-full h-full rounded-lg" />
+              {imageUrls[nft.token.publicKey] ? (
+                <Image
+                  src={imageUrls[nft.token.publicKey.toString()]}
+                  alt={nft.metadata.name}
+                  width={112}
+                  height={112}
+                  className="object-cover w-full h-full rounded-lg"
+                />
               ) : (
                 <ImageIcon className="w-10 h-10 opacity-30" />
               )}
             </div>
-            <div className="text-sm text-white font-semibold truncate w-full text-center">{nft.name}</div>
+            <div className="text-sm text-white font-semibold truncate w-full text-center">{nft.metadata.name}</div>
             <Button
               variant="ghost"
               size="sm"

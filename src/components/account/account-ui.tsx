@@ -33,7 +33,7 @@ export function AccountTokens({ address }: { address: string | PublicKey }) {
     <div className="space-y-2">
       <h2 className="text-2xl font-bold">Token Accounts</h2>
       {isLoading ? (
-        <div>Загрузка...</div>
+        <div>Loading...</div>
       ) : (
         <ul>
           {data?.map((item: any) => (
@@ -54,7 +54,7 @@ export function AccountTransactions({ address }: { address: string | PublicKey }
     <div className="space-y-2">
       <h2 className="text-2xl font-bold">Transaction History</h2>
       {isLoading ? (
-        <div>Загрузка...</div>
+        <div>Loading...</div>
       ) : (
         <ul>
           {data?.map((item: any) => (

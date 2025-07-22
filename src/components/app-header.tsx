@@ -56,7 +56,7 @@ export function AppHeader() {
       )}
     >
       <div className="mx-auto max-w-7xl flex justify-between items-center">
-        {/* Логотип */}
+        {/* Logo */}
         <Link
           className="text-2xl font-extrabold select-none flex items-center gap-2 bg-gradient-to-r from-blue-400 via-fuchsia-500 to-green-400 bg-clip-text text-transparent drop-shadow-[0_0_8px_#00d4ff99]"
           href="/"
@@ -66,7 +66,7 @@ export function AppHeader() {
           SolArtify
         </Link>
 
-        {/* Навигация десктоп */}
+        {/* Desktop Navigation */}
         <nav className="hidden md:flex gap-1 ml-8">
           {navLinks.map(({ label, path, icon }) => (
             <Link
@@ -85,14 +85,14 @@ export function AppHeader() {
           ))}
         </nav>
 
-        {/* Кошелек и селекты */}
+        {/* Wallet and Selects */}
         <div className="hidden md:flex items-center gap-3 ml-8">
           <WalletWidget {...walletWidgetProps} />
           <ClusterUiSelect />
           <ThemeSelect />
         </div>
 
-        {/* Мобильное меню */}
+        {/* Mobile Menu Toggle */}
         <Button
           variant="ghost"
           size="sm"
@@ -103,7 +103,7 @@ export function AppHeader() {
         </Button>
       </div>
 
-      {/* Мобильное меню (выезжающее) */}
+      {/* Mobile Menu (sliding) */}
       {showMenu && (
         <div
           className={`md:hidden fixed inset-0 z-40 bg-[#18181b] transition-opacity duration-300  flex flex-col animate-fade-in`}
