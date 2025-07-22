@@ -14,6 +14,9 @@ import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_I
 import { ADMIN_PUBKEY_PK } from '@/lib/constants'
 import { NftGifter } from '@/types/nft_gifter'
 import BN from 'bn.js'
+import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
+import { createProgrammableNft, mplTokenMetadata } from '@metaplex-foundation/mpl-token-metadata'
+import { generateSigner, percentAmount, signerIdentity } from '@metaplex-foundation/umi'
 // import * as anchor from '@coral-xyz/anchor'
 
 export function useNftGifterProgram() {
@@ -73,29 +76,83 @@ export function useNftGifterProgram() {
   // Mint NFT
   const mintNft = useMutation({
     mutationKey: ['nftgifter-mint-nft', { programId }],
-    mutationFn: async () => {
-      if (!program || !wallet || !wallet.publicKey) throw new Error('No wallet/program')
-      const [configPda] = findConfigPda(ADMIN_PUBKEY_PK, programId)
-      const mintPubkey = new PublicKey(process.env.NEXT_PUBLIC_MINT_PUBKEY!)
-      const userTokenAccount = await getAssociatedTokenAddress(mintPubkey, wallet.publicKey)
-      const nftMint = Keypair.generate()
-      const userNftAccount = await getAssociatedTokenAddress(nftMint.publicKey, wallet.publicKey)
-      const tx = await program.methods
-        .mintNft()
-        .accountsStrict({
-          user: wallet.publicKey,
-          config: configPda,
-          tokenMint: mintPubkey,
-          userTokenAccount,
-          nftMint: nftMint.publicKey,
-          userNftAccount,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          systemProgram: SystemProgram.programId,
-        })
-        // .signers([wallet.payer])
-        .rpc()
-      return tx
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    mutationFn: async ({
+      name,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      description,
+      metadataUri,
+    }: {
+      name: string
+      description: string
+      metadataUri: string
+    }) => {
+      try {
+        if (!program || !wallet || !wallet.publicKey) throw new Error('No wallet/program')
+        if (!metadataUri) throw new Error('Metadata URI is required')
+
+        // 1. Инициализация umi (только для Metaplex, без uploader)
+        const umi = createUmi(process.env.NEXT_PUBLIC_UMI_RPC!).use(mplTokenMetadata())
+
+        // 2. Генерируем ключевую пару (signer) для нового NFT
+        const mintSigner = generateSigner(umi)
+        umi.use(signerIdentity(mintSigner))
+
+        // 3. Конвертируем signer в Keypair для Anchor
+        const mintKeypair = Keypair.fromSecretKey(mintSigner.secretKey)
+
+        // 4. Вызов Anchor-инструкции mintNft
+        let tx = ''
+        try {
+          console.log('Calling Anchor mintNft instruction...')
+          const [configPda] = findConfigPda(ADMIN_PUBKEY_PK, programId)
+          const mintPubkey = new PublicKey(process.env.NEXT_PUBLIC_MINT_PUBKEY!)
+          const userTokenAccount = await getAssociatedTokenAddress(mintPubkey, wallet.publicKey)
+          const userNftAccount = await getAssociatedTokenAddress(mintKeypair.publicKey, wallet.publicKey)
+          tx = await program.methods
+            .mintNft()
+            .accountsStrict({
+              user: wallet.publicKey,
+              config: configPda,
+              tokenMint: mintPubkey,
+              userTokenAccount,
+              nftMint: mintKeypair.publicKey,
+              userNftAccount,
+              tokenProgram: TOKEN_PROGRAM_ID,
+              associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+              systemProgram: SystemProgram.programId,
+            })
+            // .signers([mintKeypair])
+            .rpc()
+          console.log('Anchor mintNft successful, tx:', tx)
+        } catch (e) {
+          console.error('Ошибка вызова Anchor mintNft:', e)
+          toast.error('Ошибка mintNft: ' + (e instanceof Error ? e.message : String(e)))
+          throw e
+        }
+
+        // 5. Вызов createProgrammableNft (Metaplex umi)
+        try {
+          console.log('Calling Metaplex createProgrammableNft...')
+          await createProgrammableNft(umi, {
+            mint: mintSigner,
+            sellerFeeBasisPoints: percentAmount(5.5),
+            name,
+            uri: metadataUri,
+            ruleSet: null,
+          }).sendAndConfirm(umi)
+          console.log('Metaplex createProgrammableNft successful')
+        } catch (e) {
+          console.error('Ошибка createProgrammableNft:', e)
+          toast.error('Ошибка создания метадаты: ' + (e instanceof Error ? e.message : String(e)))
+          throw e
+        }
+
+        return tx
+      } catch (e) {
+        console.error('Mint NFT error:', e)
+        throw e
+      }
     },
     onSuccess: (tx) => toast.success('NFT Minted! Tx: ' + tx),
     onError: (e) => toast.error('Mint failed: ' + (e instanceof Error ? e.message : String(e))),
@@ -130,6 +187,8 @@ export function useNftGifterProgram() {
     onError: (e) => toast.error('Purchase failed: ' + (e instanceof Error ? e.message : String(e))),
   })
 
+  // Удаляю uploadImage, теперь он в отдельном файле
+
   // TODO: purchase, mint, withdraw, updateConfig, initConfig, etc.
 
   return {
@@ -139,6 +198,7 @@ export function useNftGifterProgram() {
     claimTokens,
     mintNft,
     purchaseTokens,
+    // uploadImage,
     // ...другие хуки
   }
 }

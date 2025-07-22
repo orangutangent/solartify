@@ -3,6 +3,8 @@ import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Info } from 'lucide-react'
 import { MintForm, ImageGallery } from '@/components/mint'
+import { useNftGifterProgram } from '@/components/nftgifter/nftgifter-data-access'
+import { useUploadMetadata } from '@/components/nftgifter/upload-image.hook'
 
 const mockNfts = [
   { id: '1', name: 'My NFT #1', image: '' },
@@ -16,16 +18,21 @@ export default function MintPage() {
   const [sendAddress, setSendAddress] = useState('')
   const [sendStatus, setSendStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [showSendModal, setShowSendModal] = useState(false)
+  const { mintNft } = useNftGifterProgram()
+  const uploadMetadata = useUploadMetadata()
 
-  async function handleMint() {
+  async function handleMint({ image, name, description }: { image: string; name: string; description: string }) {
     setMinting(true)
     setMintStatus('idle')
     try {
-      // await fetch('/api/mint-nft', { method: 'POST', body: JSON.stringify({ image, prompt }) })
-      await new Promise((r) => setTimeout(r, 1200))
+      // 1. Загрузка картинки и метаданных на сервер
+      const metadataUri = await uploadMetadata.mutateAsync({ image, name, description })
+      // 2. Минт NFT с ссылкой на метаданные
+      await mintNft.mutateAsync({ name, description, metadataUri })
       setMintStatus('success')
-    } catch {
+    } catch (e) {
       setMintStatus('error')
+      console.error('Mint error:', e)
     } finally {
       setMinting(false)
     }
