@@ -9,6 +9,7 @@ import { ClusterUiSelect } from './cluster/cluster-ui'
 import { WalletWidget } from '@/components/ui/wallet-widget'
 import { cn } from '@/lib/utils'
 import { useWallet } from '@solana/wallet-adapter-react'
+import { useWalletModal } from '@solana/wallet-adapter-react-ui'
 import { useGetBalanceQuery } from '@/components/account/account-data-access'
 
 const navLinks = [
@@ -24,6 +25,7 @@ export function AppHeader() {
   const [showMenu, setShowMenu] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const wallet = useWallet()
+  const { setVisible } = useWalletModal()
   const address = wallet.publicKey?.toBase58() ?? undefined
   const { data: balanceLamports } = useGetBalanceQuery({ address: address || '' })
   const balance = typeof balanceLamports === 'number' ? balanceLamports / 1e9 : undefined
@@ -44,7 +46,7 @@ export function AppHeader() {
     isConnecting: wallet.connecting,
     address,
     balance,
-    onConnect: () => wallet.connect && wallet.connect(),
+    onConnect: () => setVisible(true),
     onDisconnect: () => wallet.disconnect && wallet.disconnect(),
   }
 
