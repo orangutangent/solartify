@@ -3,7 +3,7 @@ import { Account, address, getBase58Decoder, SolanaClient } from 'gill'
 import { SolanaClusterId } from '@wallet-ui/react'
 import { getProgramAccountsDecoded } from './helpers/get-program-accounts-decoded'
 import { Nftgifter, NFTGIFTER_DISCRIMINATOR, NFTGIFTER_PROGRAM_ADDRESS, getNftgifterDecoder } from './client/js'
-import NftgifterIDL from '../target/idl/nftgifter.json'
+import NftgifterIDL from '../../src/lib/idl.json'
 
 export type NftgifterAccount = Account<Nftgifter, string>
 
